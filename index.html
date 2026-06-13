@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bouston Harbor Tea Toss / 某ストン湾 紅茶投げ込みゲーム</title>
+<style>
+  :root{
+    --ink:#23303a; --gold:#c8a24a; --cream:#f4ecd6;
+    --sky1:#8fb6c9; --sky2:#cfe3ea; --sea1:#3a6b78; --sea2:#1f4651;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#11242b;color:var(--ink);
+    font-family:"Georgia","Hiragino Mincho ProN","Yu Mincho",serif;}
+  #wrap{max-width:760px;margin:0 auto;padding:10px;}
+  h1{font-size:18px;text-align:center;color:var(--cream);margin:6px 0 2px;letter-spacing:.5px;}
+  .sub{text-align:center;color:#9fc0cb;font-size:12px;margin:0 0 8px;}
+  #stage{position:relative;width:100%;aspect-ratio:4/3;border-radius:10px;overflow:hidden;
+    box-shadow:0 8px 30px rgba(0,0,0,.5);cursor:crosshair;user-select:none;-webkit-user-select:none;}
+  canvas{display:block;width:100%;height:100%;}
+  /* HUD */
+  #hud{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;
+    gap:8px;padding:8px 10px;font-family:"Trebuchet MS","Hiragino Sans",sans-serif;
+    color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.6);pointer-events:none;}
+  .stat{background:rgba(20,40,48,.55);border:1px solid rgba(255,255,255,.25);
+    border-radius:8px;padding:4px 10px;font-size:13px;line-height:1.25;backdrop-filter:blur(2px);}
+  .stat b{font-size:17px;}
+  #combo{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);
+    font-family:"Trebuchet MS",sans-serif;font-weight:bold;color:var(--gold);
+    text-shadow:0 2px 8px rgba(0,0,0,.7);font-size:34px;opacity:0;pointer-events:none;transition:opacity .15s;}
+  #tideWrap{position:absolute;left:10px;right:10px;bottom:10px;height:16px;border-radius:8px;
+    background:rgba(10,25,30,.5);border:1px solid rgba(255,255,255,.25);overflow:hidden;pointer-events:none;}
+  #tideSweet{position:absolute;top:0;height:100%;background:rgba(200,162,74,.45);}
+  #tideMark{position:absolute;top:-2px;width:4px;height:20px;background:#fff;border-radius:2px;box-shadow:0 0 6px #fff;}
+  #tierNow{position:absolute;left:50%;top:62px;transform:translateX(-50%);
+    font-family:sans-serif;font-size:12px;color:#fff;background:rgba(20,40,48,.6);
+    border:1px solid rgba(200,162,74,.5);border-radius:14px;padding:3px 12px;
+    text-shadow:0 1px 2px #000;pointer-events:none;white-space:nowrap;}
+  #tierNow b{color:var(--gold);}
+  #tideLabel{position:absolute;left:10px;bottom:28px;color:#fff;font-size:11px;
+    font-family:sans-serif;text-shadow:0 1px 3px #000;pointer-events:none;}
+  /* Overlays */
+  .overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;padding:18px;background:rgba(15,30,36,.82);
+    color:var(--cream);backdrop-filter:blur(3px);}
+  .overlay h2{margin:.2em 0;font-size:22px;color:var(--gold);}
+  .overlay p{margin:.35em 0;font-size:14px;max-width:90%;line-height:1.5;}
+  .btn{margin-top:14px;padding:10px 22px;font-size:15px;font-family:inherit;cursor:pointer;
+    color:var(--ink);background:var(--gold);border:none;border-radius:24px;font-weight:bold;
+    box-shadow:0 4px 0 #8a6f2c;transition:transform .05s;}
+  .btn:active{transform:translateY(2px);box-shadow:0 2px 0 #8a6f2c;}
+  .hidden{display:none!important;}
+  .btn.alt{background:#5b8aa0;color:#fff;box-shadow:0 4px 0 #3c5e6e;}
+  .btn.alt:active{box-shadow:0 2px 0 #3c5e6e;}
+  .bsub{display:block;font-size:11px;font-weight:normal;opacity:.9;margin-top:2px;}
+  .modeRow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
+  .legend{font-family:sans-serif;font-size:12px;line-height:1.6;text-align:left;
+    background:rgba(20,40,48,.5);border:1px solid rgba(255,255,255,.2);border-radius:8px;
+    padding:8px 12px;margin:6px 0;max-width:92%;}
+  .tier{font-family:sans-serif;font-size:12.5px;line-height:1.5;text-align:left;
+    background:#1b2730;border-radius:8px;padding:8px 10px;margin-top:8px;color:#d7e3e8;}
+  .tier .now{color:var(--gold);font-weight:bold;}
+  .nowrap{white-space:nowrap;}
+  /* Certificate */
+  #cert{background:rgba(8,20,25,.92);}
+  .paper{background:var(--cream);color:#3a2c12;border:6px double #b8923c;border-radius:6px;
+    padding:18px 16px;max-width:420px;width:94%;box-shadow:0 10px 40px rgba(0,0,0,.6);}
+  .paper .seal{font-size:40px;line-height:1;}
+  .paper h3{margin:6px 0 2px;font-size:19px;letter-spacing:1px;color:#7a3b2e;}
+  .paper .name{font-size:22px;margin:8px 0;border-bottom:1px solid #b8923c;display:inline-block;padding:0 18px 2px;}
+  .paper small{display:block;font-size:11px;color:#6b5a36;margin-top:8px;line-height:1.5;}
+  .fable{margin-top:12px;background:#23303a;color:#f4ecd6;border-radius:8px;padding:10px 12px;font-family:sans-serif;}
+  .fable .code{font-size:20px;letter-spacing:3px;color:var(--gold);font-weight:bold;margin-top:4px;}
+  .foot{text-align:center;color:#7f9aa3;font-size:11px;margin-top:8px;font-family:sans-serif;}
+  .en{opacity:.8;font-size:.86em;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>🫖 Bouston Harbor Tea Toss</h1>
+  <p class="sub">某ストン湾 紅茶投げ込みゲーム — クリックで茶箱を投げ込め！ / Click to dump the tea!</p>
+
+  <div id="stage">
+    <canvas id="cv" width="760" height="570"></canvas>
+
+    <div id="hud">
+      <div class="stat">SCORE / 得点<br><b id="score">0</b></div>
+      <div class="stat">TIME / 残り<br><b id="time">20</b>s</div>
+      <div class="stat">CRATES / 茶箱<br><b id="crates">0</b></div>
+    </div>
+
+    <div id="combo"></div>
+    <div id="tierNow" class="hidden"></div>
+    <div id="tideLabel">TIDE TIMING / 潮のタイミング（明るい帯で投げると倍率UP）</div>
+    <div id="tideWrap"><div id="tideSweet"></div><div id="tideMark"></div></div>
+
+    <!-- Start -->
+    <div class="overlay" id="startScreen">
+      <h2>🫖 某ストン湾へようこそ</h2>
+      <p style="font-size:12px;opacity:.85;margin:0 0 4px;">⚠️ これはジョークゲームです。実在の出来事・国・製品とは一切関係ありません。<br>
+        <span class="en">A parody mini-game. Not based on any real event, country, or product.</span></p>
+      <p>湾に紅茶（茶箱）を投げ込み続けよう。<br>
+        <span class="en">Keep tossing crates of tea into the harbor.</span></p>
+      <div class="legend">
+        <div>🎯 <b>的（埠頭）</b>に近いほど高得点 / closer to target = more</div>
+        <div>🔗 <b>連続投入</b>でコンボ倍率（最大 ×3）/ chain throws for combo</div>
+        <div>🌊 潮の<b>明るい帯</b>で投げると ×2 / bright tide band = ×2</div>
+        <div>👑 たまに現れる<b>御用船 ROYAL CARGO</b>に当てて大量得点 / hit it for a big bonus</div>
+      </div>
+      <p style="margin-top:4px;">モードを選んでね / Pick a mode:</p>
+      <div class="modeRow">
+        <button class="btn" id="startStory">認定モード / STORY<br><span class="bsub">20秒で1000点 → 市民認定</span></button>
+        <button class="btn alt" id="startAttack">スコアアタック / SCORE ATTACK<br><span class="bsub">20秒フル・特典が段階UP</span></button>
+      </div>
+    </div>
+
+    <!-- Game Over (fail) -->
+    <div class="overlay hidden" id="failScreen">
+      <h2>⏳ 時間切れ / Time's up</h2>
+      <p>得点 <b id="failScore">0</b> 点。あと一歩！<br><span class="en">So close. The Crown is amused.</span></p>
+      <button class="btn" id="retryBtn">もう一度 / RETRY</button>
+    </div>
+
+    <!-- Certificate (clear) -->
+    <div class="overlay hidden" id="cert">
+      <div class="paper">
+        <div class="seal">🦅</div>
+        <h3>CERTIFICATE OF IMAGINARY CITIZENSHIP</h3>
+        <div style="font-size:12px;color:#7a3b2e;">イマジナリー合衆国 市民認定証</div>
+        <div class="name" id="certName">紅茶男爵 / Tea Baron</div>
+        <p style="font-size:13px;margin:8px 0 0;">上記の者は、某ストン湾に <span class="nowrap"><b id="certScore">0</b> 点</span>ぶんの紅茶を投げ込んだ功績により、<span class="nowrap"><b>イマジナリー合衆国</b>の市民</span>であることを認定する。<br>
+          <span class="en">is hereby recognized as a citizen of the Imaginary United States.</span></p>
+        <div class="fable">
+          🎁 特典 / Reward（ネタ・not real）<br>
+          <b id="fableReward" style="font-size:15px;">Fable5 利用権 1ヶ月分</b>
+          <div class="code" id="fableCode">FABLE5-XXXX</div>
+        </div>
+        <small>※ これはジョークゲームです。実在の権利・市民資格・製品とは一切関係ありません。<br>
+          For entertainment only. No real statehood or product is granted.</small>
+      </div>
+      <button class="btn" id="againBtn">もう一度遊ぶ / PLAY AGAIN</button>
+    </div>
+  </div>
+  <p class="foot">made for fun · open-source · GitHub Pages ready</p>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  // ---- DOM ----
+  const elScore=document.getElementById('score'), elTime=document.getElementById('time'),
+        elCrates=document.getElementById('crates'), elCombo=document.getElementById('combo'),
+        tideSweet=document.getElementById('tideSweet'), tideMark=document.getElementById('tideMark');
+  const startScreen=document.getElementById('startScreen'), failScreen=document.getElementById('failScreen'),
+        cert=document.getElementById('cert'), tierNow=document.getElementById('tierNow');
+
+  // ---- Config ----
+  const GOAL=1000, GAME_TIME=20;
+
+  // Score Attack reward tiers (cumulative thresholds, joke rewards)
+  const TIERS=[
+    {min:0,    title:'紅茶見習い / Tea Apprentice',  reward:'Fable5 利用権 1ヶ月分'},
+    {min:1000, title:'紅茶男爵 / Tea Baron',         reward:'Fable5 利用権 2ヶ月分'},
+    {min:2000, title:'紅茶伯爵 / Tea Earl',          reward:'Fable5 利用権 3ヶ月分 ＋ トークン2倍'},
+    {min:3500, title:'紅茶侯爵 / Tea Marquess',      reward:'Fable5 利用権 6ヶ月分 ＋ トークン3倍'},
+    {min:5500, title:'紅茶大公 / Grand Duke of Tea', reward:'Fable5 利用権 1年分 ＋ トークン5倍'}
+  ];
+  function tierFor(s){let t=TIERS[0];for(const x of TIERS){if(s>=x.min)t=x;}return t;}
+  function nextTier(s){for(const x of TIERS){if(s<x.min)return x;}return null;}
+
+  // Water region (below the dock line)
+  const SHORE_Y = H*0.30;          // top of the sea
+  const SHIP = {x:W*0.20, y:SHORE_Y+30}; // crate launch point (the ship Dartmouth)
+
+  // ---- State ----
+  let state='start'; // start | play | over
+  let mode='story';  // story | attack
+  let score=0, timeLeft=GAME_TIME, crates=0;
+  let combo=0, lastThrow=0;
+  let target={x:W*0.62, y:H*0.62, r:46, vx:0.6, vy:0.32};
+  let special=null;          // royal cargo bonus ship: {x,y,r,vx,vy,life}
+  let specialTimer=4;        // seconds until next spawn
+  let tidePhase=0;                 // 0..1 oscillator
+  const sweetStart=0.34, sweetEnd=0.60;
+  let projectiles=[], splashes=[], floats=[], pops=[];
+  let last=performance.now(), tElapsed=0;
+
+  tideSweet.style.left=(sweetStart*100)+'%';
+  tideSweet.style.width=((sweetEnd-sweetStart)*100)+'%';
+
+  // ---- Helpers ----
+  function rand(a,b){return a+Math.random()*(b-a);}
+  function showCombo(txt){elCombo.textContent=txt;elCombo.style.opacity=1;
+    clearTimeout(showCombo._t);showCombo._t=setTimeout(()=>elCombo.style.opacity=0,650);}
+
+  // ---- Input ----
+  function stageToCanvas(ev){
+    const r=cv.getBoundingClientRect();
+    const cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
+    const cy=(ev.touches?ev.touches[0].clientY:ev.clientY)-r.top;
+    return {x:cx*(W/r.width), y:cy*(H/r.height)};
+  }
+  function onPress(ev){
+    if(state!=='play') return;
+    ev.preventDefault();
+    const p=stageToCanvas(ev);
+    if(p.y < SHORE_Y+8) return; // must throw into the water
+    throwCrate(p.x,p.y);
+  }
+  cv.addEventListener('mousedown',onPress);
+  cv.addEventListener('touchstart',onPress,{passive:false});
+
+  function throwCrate(tx,ty){
+    crates++; elCrates.textContent=crates;
+    projectiles.push({
+      x:SHIP.x, y:SHIP.y, sx:SHIP.x, sy:SHIP.y, tx:tx, ty:ty,
+      t:0, dur:0.55, peak:rand(70,110)
+    });
+  }
+
+  function landCrate(p){
+    // distance from target center -> base points
+    const d=Math.hypot(p.tx-target.x, p.ty-target.y);
+    let base;
+    if(d<target.r*0.5) base=100;
+    else if(d<target.r) base=60;
+    else if(d<target.r*2) base=30;
+    else base=10;
+
+    // royal cargo bonus: big flat bonus if you hit the special ship
+    let royal=0;
+    if(special && Math.hypot(p.tx-special.x, p.ty-special.y) < special.r){
+      royal=250; special.life=0; // sink it
+    }
+
+    // tide timing multiplier
+    const tm=(tidePhase>=sweetStart && tidePhase<=sweetEnd)?2:1;
+
+    // combo
+    const now=tElapsed;
+    if(now-lastThrow < 1.3) combo++; else combo=1;
+    lastThrow=now;
+    const comboMult=1+Math.min(combo-1,4)*0.5; // up to x3
+
+    const gained=Math.round((base+royal)*tm*comboMult);
+    score+=gained; elScore.textContent=score;
+
+    // FX
+    splashes.push({x:p.tx,y:p.ty,r:4,max:rand(26,40),a:1});
+    floats.push({x:p.tx,y:p.ty,vy:-0.2,life:1,a:1}); // floating crate
+    pops.push({x:p.tx,y:p.ty-18,txt:'+'+gained,a:1,vy:-0.5,
+      big:(royal>0||tm>1||combo>=3)});
+    if(royal>0) showCombo('👑 ROYAL CARGO! 御用船 直撃!');
+    else if(combo>=2) showCombo('COMBO x'+combo+(tm>1?'  TIDE!':''));
+    else if(tm>1) showCombo('TIDE BONUS!');
+
+    updateTierNow();
+    if(mode==='story' && score>=GOAL) win();
+  }
+
+  function updateTierNow(){
+    if(mode!=='attack'){tierNow.classList.add('hidden');return;}
+    tierNow.classList.remove('hidden');
+    const cur=tierFor(score), nx=nextTier(score);
+    tierNow.innerHTML = nx
+      ? '今の特典 <b>'+cur.reward+'</b> ／ 次まで <b>'+(nx.min-score)+'</b> 点'
+      : '最高ランク <b>'+cur.reward+'</b> 🎉';
+  }
+
+  // ---- Game flow ----
+  function reset(){
+    score=0;timeLeft=GAME_TIME;crates=0;combo=0;lastThrow=-10;tElapsed=0;
+    projectiles=[];splashes=[];floats=[];pops=[];special=null;specialTimer=4;
+    elScore.textContent=0;elCrates.textContent=0;elTime.textContent=GAME_TIME;
+    target.x=W*0.62;target.y=H*0.62;
+  }
+  function startGame(m){mode=m;reset();state='play';
+    updateTierNow();
+    startScreen.classList.add('hidden');failScreen.classList.add('hidden');cert.classList.add('hidden');}
+
+  function fail(){ // story mode: time up before reaching goal
+    state='over';tierNow.classList.add('hidden');
+    document.getElementById('failScore').textContent=score;
+    failScreen.classList.remove('hidden');
+  }
+
+  // Show the statehood certificate. tier-based reward for attack mode.
+  function showCert(){
+    state='over';tierNow.classList.add('hidden');
+    const t = tierFor(score); // tea-peerage rank by final score (both modes)
+    document.getElementById('certName').textContent=t.title;
+    document.getElementById('certScore').textContent=score;
+    document.getElementById('fableReward').textContent=t.reward;
+    const code='FABLE5-'+Math.random().toString(36).slice(2,6).toUpperCase()
+      +'-'+Math.random().toString(36).slice(2,6).toUpperCase();
+    document.getElementById('fableCode').textContent=code;
+    cert.classList.remove('hidden');
+  }
+  function win(){showCert();} // story clear
+
+  document.getElementById('startStory').onclick=()=>startGame('story');
+  document.getElementById('startAttack').onclick=()=>startGame('attack');
+  document.getElementById('retryBtn').onclick=()=>{
+    failScreen.classList.add('hidden');startScreen.classList.remove('hidden');state='start';};
+  document.getElementById('againBtn').onclick=()=>{
+    cert.classList.add('hidden');startScreen.classList.remove('hidden');state='start';};
+
+  // 1-second timer
+  setInterval(()=>{
+    if(state!=='play')return;
+    timeLeft--; if(timeLeft<0)timeLeft=0;
+    elTime.textContent=timeLeft;
+    if(timeLeft<=0){ mode==='attack' ? showCert() : fail(); }
+  },1000);
+
+  // ---- Update ----
+  function update(dt){
+    tidePhase=(Math.sin(tElapsed*1.6)*0.5+0.5);
+    tideMark.style.left=(tidePhase*100)+'%';
+
+    if(state==='play'){
+      // drift target, bounce inside water box
+      target.x+=target.vx; target.y+=target.vy;
+      const minX=target.r+10, maxX=W-target.r-10;
+      const minY=SHORE_Y+target.r+20, maxY=H-target.r-24;
+      if(target.x<minX||target.x>maxX){target.vx*=-1;target.x=Math.max(minX,Math.min(maxX,target.x));}
+      if(target.y<minY||target.y>maxY){target.vy*=-1;target.y=Math.max(minY,Math.min(maxY,target.y));}
+
+      // royal cargo special ship: appears periodically, drifts, then leaves
+      if(special){
+        special.x+=special.vx; special.y+=special.vy; special.life-=dt;
+        if(special.x<60||special.x>W-60) special.vx*=-1;
+        if(special.y<SHORE_Y+50||special.y>H-50) special.vy*=-1;
+        if(special.life<=0) special=null;
+      }else{
+        specialTimer-=dt;
+        if(specialTimer<=0){
+          specialTimer=rand(6,9);
+          special={x:rand(W*0.4,W*0.85), y:rand(SHORE_Y+60,H-70), r:34,
+                   vx:rand(-0.8,0.8)||0.6, vy:rand(-0.5,0.5)||0.4, life:5};
+        }
+      }
+    }
+
+    // projectiles
+    for(let i=projectiles.length-1;i>=0;i--){
+      const p=projectiles[i]; p.t+=dt/p.dur;
+      if(p.t>=1){landCrate(p);projectiles.splice(i,1);}
+    }
+    // splashes
+    for(let i=splashes.length-1;i>=0;i--){const s=splashes[i];
+      s.r+=(s.max-s.r)*0.18;s.a-=dt*1.6;if(s.a<=0)splashes.splice(i,1);}
+    // floating crates
+    for(let i=floats.length-1;i>=0;i--){const f=floats[i];
+      f.life-=dt*0.5;f.a=Math.min(1,f.life);if(f.life<=0)floats.splice(i,1);}
+    // score pops
+    for(let i=pops.length-1;i>=0;i--){const q=pops[i];
+      q.y+=q.vy;q.a-=dt*1.1;if(q.a<=0)pops.splice(i,1);}
+  }
+
+  // ---- Draw ----
+  function roundedCrate(x,y,s){
+    ctx.fillStyle='#8a5a2b';ctx.strokeStyle='#5c3a17';ctx.lineWidth=2;
+    ctx.fillRect(x-s,y-s,s*2,s*2);ctx.strokeRect(x-s,y-s,s*2,s*2);
+    ctx.beginPath();ctx.moveTo(x-s,y-s);ctx.lineTo(x+s,y+s);
+    ctx.moveTo(x+s,y-s);ctx.lineTo(x-s,y+s);ctx.stroke();
+  }
+
+  function draw(){
+    // sky
+    let g=ctx.createLinearGradient(0,0,0,SHORE_Y);
+    g.addColorStop(0,'#7ea7bd');g.addColorStop(1,'#cfe3ea');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,SHORE_Y+4);
+    // distant town silhouette
+    ctx.fillStyle='rgba(70,90,100,.55)';
+    for(let i=0;i<14;i++){const bx=i*W/14, bw=W/14-4, bh=rand(8,26)*0+ (10+((i*53)%18));
+      ctx.fillRect(bx, SHORE_Y-bh, bw, bh);}
+    // a church steeple
+    ctx.beginPath();ctx.moveTo(W*0.5-6,SHORE_Y-26);ctx.lineTo(W*0.5,SHORE_Y-46);
+    ctx.lineTo(W*0.5+6,SHORE_Y-26);ctx.closePath();ctx.fill();
+
+    // sea
+    g=ctx.createLinearGradient(0,SHORE_Y,0,H);
+    g.addColorStop(0,'#3f7280');g.addColorStop(1,'#163a44');
+    ctx.fillStyle=g;ctx.fillRect(0,SHORE_Y,W,H-SHORE_Y);
+    // waves
+    ctx.strokeStyle='rgba(255,255,255,.10)';ctx.lineWidth=2;
+    for(let r=0;r<7;r++){const yy=SHORE_Y+30+r*((H-SHORE_Y)/7);
+      ctx.beginPath();
+      for(let x=0;x<=W;x+=18){const off=Math.sin((x*0.03)+(tElapsed*1.4)+r)*3;
+        if(x===0)ctx.moveTo(x,yy+off);else ctx.lineTo(x,yy+off);}
+      ctx.stroke();}
+
+    // target ring (the prime dumping spot)
+    const pulse=1+Math.sin(tElapsed*4)*0.05;
+    ctx.save();ctx.translate(target.x,target.y);
+    for(let k=2;k>=0;k--){
+      ctx.beginPath();ctx.arc(0,0,target.r*pulse*(0.5+k*0.5),0,Math.PI*2);
+      ctx.strokeStyle=k===0?'rgba(200,162,74,.95)':'rgba(200,162,74,'+(0.5-k*0.16)+')';
+      ctx.lineWidth=k===0?4:3;ctx.stroke();
+    }
+    ctx.fillStyle='rgba(200,162,74,.85)';ctx.font='bold 13px sans-serif';
+    ctx.textAlign='center';ctx.fillText('🎯',0,-target.r*pulse-6);
+    ctx.restore();
+
+    // royal cargo bonus ship (a fleeing tax ship — hit it for a big bonus)
+    if(special){
+      const blink=0.6+0.4*Math.sin(tElapsed*8);
+      ctx.save();ctx.translate(special.x,special.y);
+      // glow ring
+      ctx.beginPath();ctx.arc(0,0,special.r,0,Math.PI*2);
+      ctx.strokeStyle='rgba(229,72,72,'+blink+')';ctx.lineWidth=3;ctx.stroke();
+      // small ship
+      ctx.fillStyle='#3a2a16';
+      ctx.beginPath();ctx.moveTo(-22,4);ctx.lineTo(22,4);ctx.lineTo(16,16);ctx.lineTo(-16,16);
+      ctx.closePath();ctx.fill();
+      ctx.strokeStyle='#2e2012';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,4);ctx.lineTo(0,-18);ctx.stroke();
+      ctx.fillStyle='#e54848';ctx.fillRect(0,-18,14,8); // royal flag
+      ctx.fillStyle='#ffd969';ctx.font='bold 12px sans-serif';ctx.textAlign='center';
+      ctx.fillText('👑 +250',0,-26);
+      ctx.restore();
+    }
+
+    // floating crates (already dumped)
+    floats.forEach(f=>{ctx.globalAlpha=Math.max(0,f.a)*0.9;roundedCrate(f.x,f.y,9);ctx.globalAlpha=1;});
+
+    // ship (Dartmouth) at launch point
+    drawShip(SHIP.x,SHIP.y-26);
+
+    // splashes
+    splashes.forEach(s=>{ctx.globalAlpha=Math.max(0,s.a);
+      ctx.strokeStyle='#eaf6f8';ctx.lineWidth=3;
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha=1;});
+
+    // projectiles (arcing crates)
+    projectiles.forEach(p=>{
+      const x=p.sx+(p.tx-p.sx)*p.t;
+      const y=p.sy+(p.ty-p.sy)*p.t - Math.sin(p.t*Math.PI)*p.peak;
+      ctx.save();ctx.translate(x,y);ctx.rotate(p.t*6);roundedCrate(0,0,10);ctx.restore();
+    });
+
+    // score pops
+    pops.forEach(q=>{ctx.globalAlpha=Math.max(0,q.a);
+      ctx.fillStyle=q.big?'#ffd969':'#ffffff';
+      ctx.font=(q.big?'bold 22px':'bold 16px')+' sans-serif';
+      ctx.textAlign='center';ctx.fillText(q.txt,q.x,q.y);ctx.globalAlpha=1;});
+  }
+
+  function drawShip(x,y){
+    ctx.save();ctx.translate(x,y);
+    // hull
+    ctx.fillStyle='#4a331e';
+    ctx.beginPath();ctx.moveTo(-46,8);ctx.lineTo(46,8);ctx.lineTo(34,30);ctx.lineTo(-34,30);
+    ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#2e2012';ctx.lineWidth=2;ctx.stroke();
+    // masts
+    ctx.strokeStyle='#3a2a16';ctx.lineWidth=3;
+    [-20,4,28].forEach(mx=>{ctx.beginPath();ctx.moveTo(mx,8);ctx.lineTo(mx,-44);ctx.stroke();});
+    // sails
+    ctx.fillStyle='rgba(244,236,214,.92)';
+    [-20,4,28].forEach(mx=>{ctx.beginPath();ctx.moveTo(mx-1,-40);
+      ctx.quadraticCurveTo(mx+16,-26,mx-1,-10);ctx.closePath();ctx.fill();});
+    // flag
+    ctx.fillStyle='#b23b2e';ctx.fillRect(28,-44,16,8);
+    ctx.restore();
+  }
+
+  // ---- Loop ----
+  function frame(now){
+    const dt=Math.min(0.05,(now-last)/1000); last=now;
+    if(state!=='over' || true){tElapsed+=dt;}
+    update(dt); draw();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
