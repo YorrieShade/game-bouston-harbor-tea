@@ -9,6 +9,11 @@ Clear the score goal and you're certified as a **citizen of the Imaginary United
 > ⚠️ これはジョークゲームです。実在の権利・市民資格・製品（Fable5 など）とは一切関係ありません。
 > For entertainment only. No real citizenship, rights, or product is granted.
 
+▶ **遊ぶ / Play now:** https://yorrieshade.github.io/game-bouston-harbor-tea/
+
+遊んだら、よければ **#某ストン湾紅茶投込** / **#BoustonTeaToss** を付けてシェアしてください。
+If you share it, the tags **#某ストン湾紅茶投込** / **#BoustonTeaToss** are appreciated.
+
 ---
 
 ## 2つのモード / Two modes
@@ -43,8 +48,8 @@ In Score Attack, a banner shows your current reward and points to the next tier,
 
 - **日英切替 / Bilingual toggle** — 画面右上のボタンで日本語⇄英語を切り替えできます（初期は日本語）。説明・ルール・HUD・認定証などUI全体が連動します。ゲームタイトルと「⚠️ ジョークゲームです」の注意書きは、どちらの言語でも常時表示のまま（切替対象外）です。
   Use the button at the top right to switch Japanese ⇄ English (Japanese by default). The whole UI follows. The game title and the "parody game" disclaimer stay visible in both languages.
-- **スマホ対応 / Mobile-friendly** — 画面幅に合わせてレイアウトが調整されます。スタート画面はスマホ幅でもスクロールなしで収まり、認定証など縦に長い画面は枠内でスクロールできます。
-  The layout adapts to screen width. The start screen fits phones without scrolling; taller screens (like the certificate) scroll within the frame.
+- **スマホ対応 / Mobile-friendly** — 画面幅に合わせてレイアウトが調整されます。スタート画面はスマホ幅でもスクロールなしで収まります。スマホでは、時間切れ・認定証などの画面は盤面（4:3）の枠を飛び出して画面全体に表示されるので、本文やボタンが見切れません。プレイ中のランク表示は不透明カードにして読みやすくし、コンボ演出は下寄りに置いて上部のランク表示と重ならないようにしています。
+  The layout adapts to screen width. The start screen fits phones without scrolling. On phones, the fail/certificate screens break out of the 4:3 stage and use the full viewport so nothing is clipped; the in-play rank banner is a solid card for readability, and the combo popup sits lower so it doesn't overlap that banner.
 
 > 倍率演出の「TIDE / TIDE BONUS」は、隣の「COMBO」と語感を揃えるため、日本語表示でも英語のままにしています。
 > The "TIDE / TIDE BONUS" callouts stay in English even in Japanese mode, to match the neighboring "COMBO".
@@ -54,8 +59,9 @@ In Score Attack, a banner shows your current reward and points to the next tier,
 ## ファイル構成 / Files
 
 ```
-index.html   # ゲーム本体（HTML + CSS + JS すべて入り）/ the whole game in one file
-README.md    # この説明 / this file
+index.html    # ゲーム本体（HTML + CSS + JS すべて入り）/ the whole game in one file
+README.md     # この説明 / this file
+CHANGELOG.md  # 変更履歴と判断理由 / change log and rationale
 ```
 
 外部ライブラリ・ビルド・サーバー不要。`index.html` をブラウザで開くだけで遊べます。
@@ -75,7 +81,8 @@ Just double-click `index.html`.
 `index.html` を GitHub Pages などの静的ホスティングにそのまま置けば遊べます（リポジトリ直下に置けば、そのURLがゲーム画面になります）。
 Drop `index.html` on any static host such as GitHub Pages — at the repo root, the page URL serves the game directly.
 
-▶ Play: `https://<ユーザー名>.github.io/<リポジトリ名>/`
+▶ Play（テンプレ / template）: `https://<ユーザー名>.github.io/<リポジトリ名>/`
+▶ このゲーム / this game: https://yorrieshade.github.io/game-bouston-harbor-tea/
 
 ---
 
