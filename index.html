@@ -102,6 +102,12 @@
     #startScreen .legend{line-height:1.5;margin:4px 0;}
     #startScreen .btn{margin-top:8px;}
     #startScreen .bsub{font-size:10px;}
+    /* fail / certificate: escape the short 4:3 stage and use the full phone screen,
+       so the certificate body and its button are never clipped */
+    #failScreen, #cert{position:fixed;}
+    /* in-play reward banner: wrap onto 2 lines instead of clipping off both edges */
+    #tierNow{white-space:normal;max-width:92%;text-align:center;
+      line-height:1.35;font-size:11px;top:52px;padding:3px 10px;}
   }
 </style>
 </head>
