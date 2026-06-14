@@ -54,6 +54,8 @@
   .hidden{display:none!important;}
   .btn.alt{background:#5b8aa0;color:#fff;box-shadow:0 4px 0 #3c5e6e;}
   .btn.alt:active{box-shadow:0 2px 0 #3c5e6e;}
+  /* brief "not yet" state right after an end screen appears, to ignore accidental taps */
+  .btn:disabled{opacity:.45;cursor:default;transform:none;}
   .bsub{display:block;font-size:11px;font-weight:normal;opacity:.9;margin-top:2px;}
   .modeRow{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px;}
   .legend{font-family:sans-serif;font-size:12px;line-height:1.6;text-align:left;
@@ -303,7 +305,7 @@
   }
   // TIDE wash: a soft looping wave that swells only while the marker sits in the
   // bright band (a timing aid). One persistent quiet loop; we just fade its gain.
-  const TIDE_VOL=0.06;
+  const TIDE_VOL=0.15;
   let tideSrc=null, tideGain=null, tideOn=false;
   function tideAudioEnsure(){
     if(!actx || tideSrc) return;
@@ -312,9 +314,9 @@
     for(let i=0;i<len;i++) d[i]=Math.random()*2-1;                 // white noise
     tideSrc=actx.createBufferSource(); tideSrc.buffer=buf; tideSrc.loop=true;
     const hp=actx.createBiquadFilter(); hp.type='highpass'; hp.frequency.value=150;
-    const lp=actx.createBiquadFilter(); lp.type='lowpass';  lp.frequency.value=520; lp.Q.value=0.6;
+    const lp=actx.createBiquadFilter(); lp.type='lowpass';  lp.frequency.value=700; lp.Q.value=0.6;
     const lfo=actx.createOscillator(); lfo.frequency.value=0.4;    // slow breathing
-    const lfoG=actx.createGain(); lfoG.gain.value=140;
+    const lfoG=actx.createGain(); lfoG.gain.value=180;
     lfo.connect(lfoG).connect(lp.frequency); lfo.start();
     tideGain=actx.createGain(); tideGain.gain.value=0.0001;
     tideSrc.connect(hp).connect(lp).connect(tideGain).connect(actx.destination);
@@ -415,11 +417,20 @@
     updateTierNow();
     startScreen.classList.add('hidden');failScreen.classList.add('hidden');cert.classList.add('hidden');}
 
+  // Briefly disable an end-screen button so a click that lands right as the screen
+  // appears (e.g. mid-throw) is ignored — a 1s "ワンクッション" with no extra clicks.
+  function armDelay(btn,ms){
+    if(!btn) return;
+    btn.disabled=true;
+    setTimeout(()=>{btn.disabled=false;}, ms||900);
+  }
+
   function fail(){ // story mode: time up before reaching goal
     state='over';tierNow.classList.add('hidden');
     sfxFail();
     document.querySelectorAll('.failScore').forEach(e=>e.textContent=score);
     failScreen.classList.remove('hidden');
+    armDelay(document.getElementById('retryBtn'),900);
   }
 
   // Show the citizenship certificate. tier-based reward for attack mode.
@@ -433,6 +444,7 @@
     certState={tier:t, code:code, score:score};
     renderCert();
     cert.classList.remove('hidden');
+    armDelay(document.getElementById('againBtn'),900);
   }
   function renderCert(){ // fill certificate DOM from stored state in current language
     if(!certState) return;
