@@ -203,11 +203,11 @@
 
   // Score Attack reward tiers (cumulative thresholds, joke rewards)
   const TIERS=[
-    {min:0,    ja:{t:'紅茶見習い', r:'Fable5 利用権 1ヶ月分'},               en:{t:'Tea Apprentice',     r:'Fable5 pass · 1 month'}},
-    {min:1000, ja:{t:'紅茶男爵',   r:'Fable5 利用権 2ヶ月分'},               en:{t:'Tea Baron',          r:'Fable5 pass · 2 months'}},
-    {min:2000, ja:{t:'紅茶伯爵',   r:'Fable5 利用権 3ヶ月分 ＋ トークン2倍'}, en:{t:'Tea Earl',           r:'Fable5 pass · 3 months + 2× tokens'}},
-    {min:3500, ja:{t:'紅茶侯爵',   r:'Fable5 利用権 6ヶ月分 ＋ トークン3倍'}, en:{t:'Tea Marquess',       r:'Fable5 pass · 6 months + 3× tokens'}},
-    {min:5500, ja:{t:'紅茶大公',   r:'Fable5 利用権 1年分 ＋ トークン5倍'},   en:{t:'Grand Duke of Tea',  r:'Fable5 pass · 1 year + 5× tokens'}}
+    {min:0,     ja:{t:'紅茶見習い', r:'Fable5 利用権 1ヶ月分'},               en:{t:'Tea Apprentice',     r:'Fable5 pass · 1 month'}},
+    {min:1000,  ja:{t:'紅茶男爵',   r:'Fable5 利用権 2ヶ月分'},               en:{t:'Tea Baron',          r:'Fable5 pass · 2 months'}},
+    {min:6000,  ja:{t:'紅茶伯爵',   r:'Fable5 利用権 3ヶ月分 ＋ トークン2倍'}, en:{t:'Tea Earl',           r:'Fable5 pass · 3 months + 2× tokens'}},
+    {min:15000, ja:{t:'紅茶侯爵',   r:'Fable5 利用権 6ヶ月分 ＋ トークン3倍'}, en:{t:'Tea Marquess',       r:'Fable5 pass · 6 months + 3× tokens'}},
+    {min:25000, ja:{t:'紅茶大公',   r:'Fable5 利用権 1年分 ＋ トークン5倍'},   en:{t:'Grand Duke of Tea',  r:'Fable5 pass · 1 year + 5× tokens'}}
   ];
   function tierFor(s){let t=TIERS[0];for(const x of TIERS){if(s>=x.min)t=x;}return t;}
   function nextTier(s){for(const x of TIERS){if(s<x.min)return x;}return null;}

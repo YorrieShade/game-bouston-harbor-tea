@@ -59,9 +59,8 @@ In Score Attack, a banner shows your current reward and points to the next tier,
 ## ファイル構成 / Files
 
 ```
-index.html    # ゲーム本体（HTML + CSS + JS すべて入り）/ the whole game in one file
-README.md     # この説明 / this file
-CHANGELOG.md  # 変更履歴と判断理由 / change log and rationale
+index.html   # ゲーム本体（HTML + CSS + JS すべて入り）/ the whole game in one file
+README.md    # この説明 / this file
 ```
 
 外部ライブラリ・ビルド・サーバー不要。`index.html` をブラウザで開くだけで遊べます。
@@ -106,9 +105,9 @@ Your final score sets the (joke) Fable5 reward you "earn":
 |---|---|---|
 | 0+ | 紅茶見習い / Tea Apprentice | Fable5 利用権 1ヶ月分 |
 | 1000+ | 紅茶男爵 / Tea Baron | Fable5 利用権 2ヶ月分 |
-| 2000+ | 紅茶伯爵 / Tea Earl | Fable5 利用権 3ヶ月分 ＋ トークン2倍 |
-| 3500+ | 紅茶侯爵 / Tea Marquess | Fable5 利用権 6ヶ月分 ＋ トークン3倍 |
-| 5500+ | 紅茶大公 / Grand Duke of Tea | Fable5 利用権 1年分 ＋ トークン5倍 |
+| 6000+ | 紅茶伯爵 / Tea Earl | Fable5 利用権 3ヶ月分 ＋ トークン2倍 |
+| 15000+ | 紅茶侯爵 / Tea Marquess | Fable5 利用権 6ヶ月分 ＋ トークン3倍 |
+| 25000+ | 紅茶大公 / Grand Duke of Tea | Fable5 利用権 1年分 ＋ トークン5倍 |
 
 しきい値や特典文言は `index.html` の `TIERS` 配列で自由に編集できます。
 Edit the thresholds and reward text in the `TIERS` array in `index.html`.
