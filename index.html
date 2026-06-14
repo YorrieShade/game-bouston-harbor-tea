@@ -105,9 +105,12 @@
     /* fail / certificate: escape the short 4:3 stage and use the full phone screen,
        so the certificate body and its button are never clipped */
     #failScreen, #cert{position:fixed;}
-    /* in-play reward banner: wrap onto 2 lines instead of clipping off both edges */
-    #tierNow{white-space:normal;max-width:92%;text-align:center;
-      line-height:1.35;font-size:11px;top:52px;padding:3px 10px;}
+    /* in-play reward banner: wrap instead of clipping, and use a solid card so it
+       reads cleanly on top of the ship / horizon instead of looking cramped */
+    #tierNow{white-space:normal;max-width:94%;text-align:center;
+      line-height:1.3;font-size:11px;top:50px;padding:4px 12px;
+      background:rgba(12,26,32,.95);border-color:rgba(200,162,74,.75);
+      box-shadow:0 2px 8px rgba(0,0,0,.45);}
   }
 </style>
 </head>
