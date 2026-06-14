@@ -39,6 +39,18 @@ In Score Attack, a banner shows your current reward and points to the next tier,
 
 ---
 
+## 表示と言語 / Display & language
+
+- **日英切替 / Bilingual toggle** — 画面右上のボタンで日本語⇄英語を切り替えできます（初期は日本語）。説明・ルール・HUD・認定証などUI全体が連動します。ゲームタイトルと「⚠️ ジョークゲームです」の注意書きは、どちらの言語でも常時表示のまま（切替対象外）です。
+  Use the button at the top right to switch Japanese ⇄ English (Japanese by default). The whole UI follows. The game title and the "parody game" disclaimer stay visible in both languages.
+- **スマホ対応 / Mobile-friendly** — 画面幅に合わせてレイアウトが調整されます。スタート画面はスマホ幅でもスクロールなしで収まり、認定証など縦に長い画面は枠内でスクロールできます。
+  The layout adapts to screen width. The start screen fits phones without scrolling; taller screens (like the certificate) scroll within the frame.
+
+> 倍率演出の「TIDE / TIDE BONUS」は、隣の「COMBO」と語感を揃えるため、日本語表示でも英語のままにしています。
+> The "TIDE / TIDE BONUS" callouts stay in English even in Japanese mode, to match the neighboring "COMBO".
+
+---
+
 ## ファイル構成 / Files
 
 ```
@@ -108,6 +120,21 @@ Edit near the `Config` section in `index.html`:
 
 難しくしたいなら `GOAL` を上げる・`GAME_TIME` を下げる・`target.r` を小さくしてください。
 To make it harder: raise `GOAL`, lower `GAME_TIME`, or shrink `target.r`.
+
+### 文言の編集・翻訳 / Editing & translating text
+
+日英切替は、`<html data-lang="ja">` 属性とCSSの出し分けで動いています。
+The language toggle works via the `data-lang` attribute on `<html>` plus CSS show/hide.
+
+- 画面に出る文言は `<span class="t-ja">日本語</span><span class="t-en">English</span>` のペアで書きます。`data-lang` に応じて片方だけ表示されます。
+  On-screen text is written as `<span class="t-ja">…</span><span class="t-en">…</span>` pairs; only one shows per language.
+- JS内で動的に出る文言（特典ランクやコンボ演出など）は `L('日本語','English')` ヘルパーと `TIERS` 配列の `ja` / `en` で言語ごとに持っています。
+  Dynamic text in JS (reward tiers, combo callouts) uses the `L('ja','en')` helper and the `ja` / `en` fields of the `TIERS` array.
+- タイトルと注意書きは意図的に切替対象外（常時表示）です。常時表示にしたい文言は `t-ja` / `t-en` ではなく通常のテキストにしてください。
+  The title and disclaimer are intentionally not toggled. To keep any text always visible, write it as plain text rather than `t-ja` / `t-en`.
+
+別言語を足したい場合は、`data-lang` の値・CSSの出し分け・`L()` を拡張すれば対応できます。
+To add another language, extend the `data-lang` values, the CSS rules, and the `L()` helper.
 
 ---
 
